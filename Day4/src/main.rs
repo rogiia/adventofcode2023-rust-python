@@ -28,10 +28,8 @@ fn parse_input(lines: Vec<&str>) -> Vec<Scratchcard> {
   let mut cards: Vec<Scratchcard> = Vec::new();
   let re = Regex::new(r"Card\s+(?<id>\d+): (?<winning>[\d\s]*) \| (?<own>[\d\s]*)").unwrap();
   for line in lines {
-    println!("New line {}", line);
     match re.captures(line) {
       Some(captures) => {
-        println!("{:?}", captures);
         let winning_num: Vec<&str> = (&captures)["winning"].split(" ").filter(|s| !s.is_empty()).collect();
         let own_num: Vec<&str> = (&captures)["own"].split(" ").filter(|s| !s.is_empty()).collect();
         cards.push(Scratchcard {
@@ -63,8 +61,18 @@ fn prob_a(cards: &mut Vec<Scratchcard>) -> usize {
 
 fn prob_b(cards: &mut Vec<Scratchcard>) -> usize {
   let mut sum: usize = 0;
-  for card in cards {
-    
+  let mut instances: Vec<usize> = vec![1; cards.len()];
+  for (idx, card) in cards.iter().enumerate() {
+    let winning_nums = card.get_winning_numbers();
+    let mut j = idx + 1;
+    while j <= idx + winning_nums.len() {
+      instances[j] = instances[j] + instances[idx];
+      j = j + 1;
+    }
+  }
+
+  for instance in instances {
+    sum = sum + instance;
   }
 
   sum
@@ -77,7 +85,7 @@ fn main() {
     .collect();
 
   let mut cards = parse_input(lines);
-  let result = prob_a(&mut cards);
+  let result = prob_b(&mut cards);
 
   println!("Result: {}", result);
 }
